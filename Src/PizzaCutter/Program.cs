@@ -17,11 +17,10 @@ namespace PizzaCutter
 		{
 			var inputFile = ConfigurationManager.AppSettings["Input.Path"];
 			var nbRun = int.Parse(ConfigurationManager.AppSettings["Iteration.Count"]);
-			var nbParallelRun = int.Parse(ConfigurationManager.AppSettings["Iteration.Parallel"]);
 
 			Console.ForegroundColor = ConsoleColor.White;
 
-			Parallel.For(0, nbRun, new ParallelOptions() { MaxDegreeOfParallelism = nbParallelRun }, w => {
+			Parallel.For(0, nbRun, new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount }, w => {
 				var pizza = new Pizza();
 
 				var inputData = pizza.ParseInput(inputFile);
