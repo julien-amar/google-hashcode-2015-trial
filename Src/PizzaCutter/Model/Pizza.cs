@@ -1,6 +1,7 @@
 ﻿using PizzaCutter.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 
@@ -49,16 +50,20 @@ namespace PizzaCutter.Model
 
 		public IEnumerable<PizzaSlice> FindPizzaSlices(InputData inputData)
 		{
+			var parts = new List<PizzaSlice>();
+
 			for (int y = 0; y < inputData.Rows; ++y)
 				for (int x = 0; x < inputData.Columns; ++x)
 				{
 					for (int height = 1; height <= inputData.MaximumSizeOfSlice; ++height)
 						for (int width = inputData.MaximumSizeOfSlice / height; width > 0; --width)
 						{
-							if (width * height < inputData.MaximumHamOnSlice)
+							var surface = width * height;
+
+							if (surface < inputData.MaximumHamOnSlice)
 								continue;
 
-							if (width * height > inputData.MaximumSizeOfSlice)
+							if (surface > inputData.MaximumSizeOfSlice)
 								continue;
 
 							if (y + height > inputData.Rows)
@@ -74,23 +79,36 @@ namespace PizzaCutter.Model
 									part.ImpactedCells.Add(inputData.Pizza[yPart, xPart]);
 
 							if (part.ImpactedCells.Where(c => c.IsHam).Count() == 3)
-								yield return part;
+								parts.Add(part);
 						}
 				}
+
+			return parts
+				.OrderByDescending(x => x.Surface)
+				.ToList();
 		}
 
 		public IEnumerable<PizzaSlice> SlicePizza(IEnumerable<PizzaSlice> slices)
 		{
-			List<PizzaSlice> miam = new List<PizzaSlice>();
-
-			slices = slices
-				.Shuffle()
-				.OrderByDescending(x => x.Width * x.Height)
-				.ToList();
+			var randomCounter = int.Parse(ConfigurationManager.AppSettings["Random.Counter"]);
+			var slicedParts = new List<PizzaSlice>();
 
 			while (slices.Any())
 			{
-				var slice = slices.First();
+				PizzaSlice slice;
+
+				if (randomCounter > 0)
+				{
+					var biggestSliceSize = slices.Max(s => s.Surface);
+
+                    slice = slices.ShuffleFirst();
+
+					randomCounter--;
+				}
+				else
+				{
+					slice = slices.FirstOrDefault();
+				}
 
 				foreach (var impactedCell in slice.ImpactedCells)
 				{
@@ -101,8 +119,10 @@ namespace PizzaCutter.Model
 					.Where(x => !x.ImpactedCells.Any(c => c.State == PizzaCellState.Analyzed))
 					.ToList();
 
-				yield return slice;
+				slicedParts.Add(slice);
 			}
+
+			return slicedParts;
 		}
 
 		public int CalculteScore(IEnumerable<PizzaSlice> slices)

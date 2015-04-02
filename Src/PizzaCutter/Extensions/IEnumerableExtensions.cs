@@ -6,6 +6,16 @@ namespace PizzaCutter.Extensions
 {
 	public static class IEnumerableExtensions
 	{
+		public static T ShuffleFirst<T>(this IEnumerable<T> source)
+		{
+			return source.Shuffle().FirstOrDefault();
+		}
+
+		public static T ShuffleFirst<T>(this IEnumerable<T> source, Random rng)
+		{
+			return source.Shuffle(rng).FirstOrDefault();
+		}
+
 		public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
 		{
 			var rng = new Random();
@@ -20,8 +30,7 @@ namespace PizzaCutter.Extensions
 			return source.ShuffleIterator(rng);
 		}
 
-		private static IEnumerable<T> ShuffleIterator<T>(
-			this IEnumerable<T> source, Random rng)
+		private static IEnumerable<T> ShuffleIterator<T>(this IEnumerable<T> source, Random rng)
 		{
 			var buffer = source.ToList();
 

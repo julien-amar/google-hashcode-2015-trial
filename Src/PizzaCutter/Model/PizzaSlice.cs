@@ -11,6 +11,8 @@ namespace PizzaCutter.Model
 
 		public ICollection<PizzaCell> ImpactedCells { get; private set; }
 
+		public int Surface { get { return Width * Height; } }
+
 		public PizzaSlice(int x, int y, int width, int height)
 		{
 			X = x;

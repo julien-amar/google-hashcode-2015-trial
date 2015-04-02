@@ -1,6 +1,7 @@
 ﻿using PizzaCutter.Model;
 using System;
 using System.Configuration;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,11 +17,11 @@ namespace PizzaCutter
 		{
 			var inputFile = ConfigurationManager.AppSettings["Input.Path"];
 			var nbRun = int.Parse(ConfigurationManager.AppSettings["Iteration.Count"]);
+			var nbParallelRun = int.Parse(ConfigurationManager.AppSettings["Iteration.Parallel"]);
 
 			Console.ForegroundColor = ConsoleColor.White;
 
-			Parallel.For(0, nbRun,  w =>
-			{
+			Parallel.For(0, nbRun, new ParallelOptions() { MaxDegreeOfParallelism = nbParallelRun }, w => {
 				var pizza = new Pizza();
 
 				var inputData = pizza.ParseInput(inputFile);
